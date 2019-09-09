@@ -36,43 +36,54 @@ namespace ITI.CryptoDatas.Controllers
         }
 
         [HttpGet]
-        public ActionResult<string> Register(string username, string password)
+        public ActionResult<bool> Register(string username, string password)
         {
+            if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password)) return false;
             var array = JArray.Parse(this.url);
             var itemToAdd = new JObject();
             itemToAdd["username"] = username;
-            itemToAdd["password"] = "password";
+            itemToAdd["password"] = password;
             array.Add(itemToAdd);
 
             var jsonToOutput = JsonConvert.SerializeObject(array, Formatting.Indented);
             System.IO.File.AppendAllText(this.url, jsonToOutput);
-
-            return "value";
+            return true;
         }
 
         [HttpDelete]
-        public ActionResult<string> Delete(string username)
+        public ActionResult<bool> Delete(string username)
         {
+            if (String.IsNullOrEmpty(username)) return false;
             var array = JArray.Parse(this.url);
-            array.Remove();
-
+            var item = this.ToFind(username);
+            array.Remove(item.Value);
             var jsonToOutput = JsonConvert.SerializeObject(array, Formatting.Indented);
             System.IO.File.AppendAllText(this.url, jsonToOutput);
-
-            return "value";
+            return true;
         }
 
         [HttpPut]
-        public ActionResult<string> Edit()
+        public ActionResult<bool> Edit(string username, string password)
         {
-            return "value";
+            if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password)) return false;
+            var array = JArray.Parse(this.url);
+            var item = this.ToFind(username);
+            array.Remove(item.Value);
+            var itemToAdd = new JObject();
+            itemToAdd["username"] = username;
+            itemToAdd["password"] = password;
+            array.Add(itemToAdd);
+            var jsonToOutput = JsonConvert.SerializeObject(array, Formatting.Indented);
+            System.IO.File.AppendAllText(this.url, jsonToOutput);
+            return true;
         }
 
-        // find an implmentation
         [HttpPost]
-        public ActionResult<string> ToFind()
+        public ActionResult<JObject> ToFind(string username)
         {
-            return "value";
+            var array = JArray.Parse(this.url);
+            var item = array.Children<JObject>().FirstOrDefault(o => o["username"] != null && o["username"].ToString() == username);
+            return item;
         }
     }
 }
