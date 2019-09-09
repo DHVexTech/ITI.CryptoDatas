@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using ITI.CryptoDatas.Managers;
 using ITI.CryptoDatas.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -18,72 +21,58 @@ namespace ITI.CryptoDatas.Controllers
     [ApiController]
     public class UsersController : Controller
     {
+        string _url;
+        private UsersManager _userManager;
 
-        String url = "./users.json";
-        [HttpGet]
-        public ActionResult<bool> Login(string username, string password)
+        public UsersController()
         {
-            var data = JsonConvert.DeserializeObject<dataUser>(this.url);
-            var users = data.Users;
-            if(users.Count > 0)
-            {
-                if(users.FindIndex((User user) => user.username == username && user.password == password) != -1)
-                {
-                    return true;
-                }
-            }
-            return false;
+            _userManager = new UsersManager();
+            _url = "./users.json";
         }
 
-        [HttpGet]
-        public ActionResult<bool> Register(string username, string password)
-        {
-            if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password)) return false;
-            var array = JArray.Parse(this.url);
-            var itemToAdd = new JObject();
-            itemToAdd["username"] = username;
-            itemToAdd["password"] = password;
-            array.Add(itemToAdd);
 
-            var jsonToOutput = JsonConvert.SerializeObject(array, Formatting.Indented);
-            System.IO.File.AppendAllText(this.url, jsonToOutput);
-            return true;
+        [HttpPost("login")]
+        public ActionResult<User> Login([FromBody]User userData)
+        {
+           if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return null;
+           return _userManager.Login(userData);
+        }
+
+        [HttpPost("register")]
+        public ActionResult<bool> Register([FromBody]User userData)
+        {
+            if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return null;
+            return _userManager.Register(userData);
         }
 
         [HttpDelete]
         public ActionResult<bool> Delete(string username)
         {
-            if (String.IsNullOrEmpty(username)) return false;
-            var array = JArray.Parse(this.url);
-            var item = this.ToFind(username);
-            array.Remove(item.Value);
-            var jsonToOutput = JsonConvert.SerializeObject(array, Formatting.Indented);
-            System.IO.File.AppendAllText(this.url, jsonToOutput);
-            return true;
+            if (string.IsNullOrEmpty(username)) return false;
+            return _userManager.Delete(username);
         }
 
-        [HttpPut]
-        public ActionResult<bool> Edit(string username, string password)
-        {
-            if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password)) return false;
-            var array = JArray.Parse(this.url);
-            var item = this.ToFind(username);
-            array.Remove(item.Value);
-            var itemToAdd = new JObject();
-            itemToAdd["username"] = username;
-            itemToAdd["password"] = password;
-            array.Add(itemToAdd);
-            var jsonToOutput = JsonConvert.SerializeObject(array, Formatting.Indented);
-            System.IO.File.AppendAllText(this.url, jsonToOutput);
-            return true;
-        }
+        //[HttpPut]
+        //public ActionResult<bool> Edit(string username, string password)
+        //{
+        //    if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password)) return false;
+        //    var array = JArray.Parse(this.url);
+        //    var item = this.ToFind(username);
+        //    array.Remove(item.Value);
+        //    var itemToAdd = new JObject();
+        //    itemToAdd["username"] = username;
+        //    itemToAdd["password"] = password;
+        //    array.Add(itemToAdd);
+        //    var jsonToOutput = JsonConvert.SerializeObject(array, Formatting.Indented);
+        //    System.IO.File.AppendAllText(this.url, jsonToOutput);
+        //    return true;
+        //}
 
-        [HttpPost]
-        public ActionResult<JObject> ToFind(string username)
+        [HttpGet]
+        public ActionResult<User> GetUser(string username)
         {
-            var array = JArray.Parse(this.url);
-            var item = array.Children<JObject>().FirstOrDefault(o => o["username"] != null && o["username"].ToString() == username);
-            return item;
+            if (string.IsNullOrEmpty(username)) return null;
+            return _userManager.GetUser(username);
         }
     }
 }
