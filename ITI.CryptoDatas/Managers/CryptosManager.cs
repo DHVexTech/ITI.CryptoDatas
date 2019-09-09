@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ITI.CryptoDatas.Managers
 {
-    public class CryptoManager
+    public class CryptosManager
     {
     }
 }

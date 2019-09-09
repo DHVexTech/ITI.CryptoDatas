@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ITI.CryptoDatas.Models
+namespace ITI.CryptoDatas.Helpers
 {
-    public class Clrypto
+    public class HttpHelper
     {
     }
 }
