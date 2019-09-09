@@ -7,5 +7,8 @@ namespace ITI.CryptoDatas.Models
 {
     public class Crypto
     {
+        public string Name { get; set; }
+        public double CryptoPrice { get; set; }
+        public DateTime LastUpdate { get; set; }
     }
 }

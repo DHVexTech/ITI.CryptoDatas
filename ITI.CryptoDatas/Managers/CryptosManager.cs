@@ -1,11 +1,71 @@
-﻿using System;
+﻿using ITI.CryptoDatas.Enums;
+using ITI.CryptoDatas.Helpers;
+using ITI.CryptoDatas.Models;
+using ITI.CryptoDatas.Models.MarketCoin;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ITI.CryptoDatas.Managers
 {
-    public class CryptoManager
+    public class CryptosManager
     {
+        public CryptosManager()
+        {
+        }
+
+
+        public async Task<Crypto> GetCryptoData(string baseUri, string apiKey, string crypto)
+        {
+            string cryptoName = crypto.ToUpper();
+            Enum.TryParse(cryptoName, out CryptoEnum cryptoSelected);
+            if (cryptoSelected == CryptoEnum.None)
+                throw new ArgumentException("The current crypto is not exist or not supported");
+
+            string response = await HttpHelper.SendRequest(baseUri, "v1/cryptocurrency/listings/latest", apiKey);
+            Price priceResult = JsonConvert.DeserializeObject<Price>(response);
+            CryptoCurrency cryptoResult = priceResult.Data.First(x => x.Id == (int)cryptoSelected);
+
+            List<Crypto> cryptos = GetFromDatabase();
+            Crypto cryptoModel = cryptos.Find(x => x.Name == cryptoName);
+            if (cryptoModel != null)
+                cryptos.Remove(cryptoModel);
+
+            cryptoModel = new Crypto()
+            {
+                LastUpdate = DateTime.UtcNow,
+                Name = cryptoName,
+                CryptoPrice = cryptoResult.Quote.USD.Price
+            };
+
+            cryptos.Add(cryptoModel);
+            WriteInDatabase(cryptos);
+            return cryptoModel;
+        }
+
+        private List<Crypto> GetFromDatabase()
+        {
+            using (StreamReader r = new StreamReader(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Databases\Cryptos.json")))
+            {
+                string json = r.ReadToEnd();
+                return JsonConvert.DeserializeObject<List<Crypto>>(json);
+            }
+        }
+
+        private void WriteInDatabase(List<Crypto> cryptos)
+        {
+            using (StreamWriter w = new StreamWriter(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Databases\Cryptos.json")))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(w, cryptos);
+            }
+        }
+
     }
 }
