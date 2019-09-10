@@ -32,7 +32,7 @@ namespace ITI.CryptoDatas.Controllers
         public ActionResult<Wallet> Refund([FromBody]Wallet wallet)
         {
             ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
-            return _walletManager.Refund(wallet, currentUsername.Name);
+            return _walletManager.ManageFund(wallet, currentUsername.Name, "+");
         }
 
         [HttpPut("removefund")]
@@ -40,7 +40,7 @@ namespace ITI.CryptoDatas.Controllers
         public ActionResult<Wallet> RemoveFund([FromBody]Wallet wallet)
         {
             ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
-            return _walletManager.RemoveFund(wallet, currentUsername.Name);
+            return _walletManager.ManageFund(wallet, currentUsername.Name, "-");
         }
     }
 }
