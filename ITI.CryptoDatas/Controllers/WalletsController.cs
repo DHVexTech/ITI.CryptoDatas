@@ -34,5 +34,13 @@ namespace ITI.CryptoDatas.Controllers
             ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
             return _walletManager.Refund(wallet, currentUsername.Name);
         }
+
+        [HttpPut("removefund")]
+        [Authorize]
+        public ActionResult<Wallet> RemoveFund([FromBody]Wallet wallet)
+        {
+            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
+            return _walletManager.RemoveFund(wallet, currentUsername.Name);
+        }
     }
 }

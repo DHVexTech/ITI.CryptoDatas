@@ -41,13 +41,30 @@ namespace ITI.CryptoDatas.Managers
             return true;
         }
 
-        public Wallet Refund(Wallet wallet, string username)
+        public Wallet Refund(Wallet refundProps, string username)
         {
-            double currentFund = 0;
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
+            User currentUser = _userManager.GetUser(username);
+            Wallet walletSelected = wallets.Single(x => x.CryptoName == refundProps.CryptoName && currentUser.Wallets.Contains(x.Id));
+            wallets.Remove(walletSelected);
+            walletSelected.Fund += refundProps.Fund;
+            wallets.Add(walletSelected);
+            JsonHelper.WriteInDatabase<Wallet>(wallets, _databaseName);
+            walletSelected.Id = 0;
+            return walletSelected;
+        }
 
-
-            return wallet;
+        public Wallet RemoveFund(Wallet refundProps, string username)
+        {
+            List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
+            User currentUser = _userManager.GetUser(username);
+            Wallet walletSelected = wallets.Single(x => x.CryptoName == refundProps.CryptoName && currentUser.Wallets.Contains(x.Id));
+            wallets.Remove(walletSelected);
+            walletSelected.Fund -= refundProps.Fund;
+            wallets.Add(walletSelected);
+            JsonHelper.WriteInDatabase<Wallet>(wallets, _databaseName);
+            walletSelected.Id = 0;
+            return walletSelected;
         }
 
         public bool Delete(int walletId)
@@ -60,6 +77,13 @@ namespace ITI.CryptoDatas.Managers
                 return true;
             }
             return false;
+        }
+
+        private void GetUserWallet(string username, string crypto)
+        {
+            List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
+            User currentUser = _userManager.GetUser(username);
+            return wallets.Single(x => x.CryptoName == crypto && currentUser.Wallets.Contains(x.Id));
         }
     }
 }
