@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ITI.CryptoDatas.Managers;
 using ITI.CryptoDatas.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -21,13 +22,14 @@ namespace ITI.CryptoDatas.Controllers
     [ApiController]
     public class UsersController : Controller
     {
-        string _url;
         private UsersManager _userManager;
+        private readonly IConfiguration _configuration;
 
-        public UsersController()
+        public UsersController(IConfiguration config, UsersManager usersManager)
         {
-            _userManager = new UsersManager();
-            _url = "./users.json";
+            _configuration = config;
+            _key = _configuration.GetValue<string>("Token:Secret");
+            _userManager = usersManager;
         }
 
 
@@ -39,7 +41,7 @@ namespace ITI.CryptoDatas.Controllers
         }
 
         [HttpPost("register")]
-        public ActionResult<bool> Register([FromBody]User userData)
+        public ActionResult<User> Register([FromBody]User userData)
         {
             if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return null;
             return _userManager.Register(userData);
@@ -56,7 +58,7 @@ namespace ITI.CryptoDatas.Controllers
         public ActionResult<bool> Edit(User userInput)
         {
             if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return false;
-            return _userManager.Edit(userInput)
+            return _userManager.Edit(userInput);
         }
 
         [HttpGet]
