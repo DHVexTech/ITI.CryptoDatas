@@ -8,5 +8,7 @@ namespace ITI.CryptoDatas.Models
     public class Wallet
     {
         public int Id { get; set; }
+        public string CryptoName { get; set; }
+        public double Fund { get; set; }
     }
 }

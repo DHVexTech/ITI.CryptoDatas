@@ -1,4 +1,5 @@
-﻿using ITI.CryptoDatas.Models;
+﻿using ITI.CryptoDatas.Helpers;
+using ITI.CryptoDatas.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,9 +12,18 @@ namespace ITI.CryptoDatas.Managers
 {
     public class WalletsManager
     {
+        public UsersManager _userManager;
+        private readonly string _databaseName;
+
+        public WalletsManager(UsersManager userManager)
+        {
+            _userManager = userManager;
+            _databaseName = "wallets";
+        }
+
         public Wallet GetWallet(int walletId)
         {
-            List<Wallet> wallets = GetFromDatabase();
+            List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
             if (wallets.Count > 0)
             {
                 Wallet wallet = wallets.First(x => x.Id == walletId);
@@ -25,40 +35,31 @@ namespace ITI.CryptoDatas.Managers
 
         public bool Add (Wallet wallet) 
         {
-            List<Wallet> list = GetFromDatabase();
+            List<Wallet> list = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
             list.Add(wallet);
-            WriteInDatabase(list);
+            JsonHelper.WriteInDatabase<Wallet>(list, _databaseName);
             return true;
+        }
+
+        public Wallet Refund(Wallet wallet, string username)
+        {
+            double currentFund = 0;
+            List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
+
+
+            return wallet;
         }
 
         public bool Delete(int walletId)
         {
-            List<Wallet> wallets = GetFromDatabase();
+            List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
             Wallet wallet = wallets.First(x => x.Id == walletId);
             if (wallets.Remove(wallet))
             {
-                WriteInDatabase(wallets);
+                JsonHelper.WriteInDatabase<Wallet>(wallets, _databaseName);
                 return true;
             }
             return false;
-        }
-
-        private List<Wallet> GetFromDatabase()
-        {
-            using (StreamReader r = new StreamReader(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Databases\wallets.json")))
-            {
-                string json = r.ReadToEnd();
-                return JsonConvert.DeserializeObject<List<Wallet>>(json);
-            }
-        }
-
-        private void WriteInDatabase(List<Wallet> wallets)
-        {
-            using (StreamWriter w = new StreamWriter(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Databases\wallets.json")))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(w, wallets);
-            }
         }
     }
 }
