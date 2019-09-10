@@ -16,7 +16,7 @@ namespace ITI.CryptoDatas.Managers
             List<Wallet> wallets = GetFromDatabase();
             if (wallets.Count > 0)
             {
-                Wallet wallet = wallets.First(x => x.id == walletId);
+                Wallet wallet = wallets.First(x => x.Id == walletId);
                 if (wallet != null)
                     return wallet;
             }
@@ -34,7 +34,7 @@ namespace ITI.CryptoDatas.Managers
         public bool Delete(int walletId)
         {
             List<Wallet> wallets = GetFromDatabase();
-            Wallet wallet = wallets.First(x => x.id == walletId);
+            Wallet wallet = wallets.First(x => x.Id == walletId);
             if (wallets.Remove(wallet))
             {
                 WriteInDatabase(wallets);
