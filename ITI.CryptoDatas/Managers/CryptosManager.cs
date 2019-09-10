@@ -16,10 +16,11 @@ namespace ITI.CryptoDatas.Managers
 {
     public class CryptosManager
     {
+        private readonly string _databaseName;
         public CryptosManager()
         {
+            _databaseName = "cryptos";
         }
-
 
         public async Task<Crypto> GetCryptoData(string baseUri, string apiKey, string crypto)
         {
@@ -32,7 +33,7 @@ namespace ITI.CryptoDatas.Managers
             Price priceResult = JsonConvert.DeserializeObject<Price>(response);
             CryptoCurrency cryptoResult = priceResult.Data.First(x => x.Id == (int)cryptoSelected);
 
-            List<Crypto> cryptos = GetFromDatabase();
+            List<Crypto> cryptos = JsonHelper.GetFromDatabase<Crypto>(_databaseName);
             Crypto cryptoModel = cryptos.Find(x => x.Name == cryptoName);
             if (cryptoModel != null)
                 cryptos.Remove(cryptoModel);
@@ -45,27 +46,8 @@ namespace ITI.CryptoDatas.Managers
             };
 
             cryptos.Add(cryptoModel);
-            WriteInDatabase(cryptos);
+            JsonHelper.WriteInDatabase<Crypto>(cryptos, _databaseName);
             return cryptoModel;
         }
-
-        private List<Crypto> GetFromDatabase()
-        {
-            using (StreamReader r = new StreamReader(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Databases\Cryptos.json")))
-            {
-                string json = r.ReadToEnd();
-                return JsonConvert.DeserializeObject<List<Crypto>>(json);
-            }
-        }
-
-        private void WriteInDatabase(List<Crypto> cryptos)
-        {
-            using (StreamWriter w = new StreamWriter(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Databases\Cryptos.json")))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.Serialize(w, cryptos);
-            }
-        }
-
     }
 }

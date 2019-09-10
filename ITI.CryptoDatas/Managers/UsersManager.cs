@@ -32,7 +32,7 @@ namespace ITI.CryptoDatas.Managers
 
         public User GetUser(string username)
         {
-            List<User> users = GetFromDatabase();
+            List<User> users = JsonHelper.GetFromDatabase<User>(_databaseName);
             if (users.Count > 0)
             {
                 User user = users.First(x => x.Username == username);
