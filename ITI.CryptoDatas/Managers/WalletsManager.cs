@@ -79,6 +79,12 @@ namespace ITI.CryptoDatas.Managers
             return walletSelected;
         }
 
+        public List<Wallet> GetUserWallets(User user)
+        {
+            List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
+            return wallets.Where(x => user.Wallets.Contains(x.Id)).ToList();
+        }
+
         public bool Delete(int walletId)
         {
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
