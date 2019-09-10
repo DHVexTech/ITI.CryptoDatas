@@ -23,6 +23,13 @@ namespace ITI.CryptoDatas.Managers
             return null;
         }
 
+        public bool Add (Wallet wallet) 
+        {
+            List<Wallet> list = GetFromDatabase();
+            list.Add(wallet);
+            WriteInDatabase(list);
+            return true;
+        }
 
         public bool Delete(int walletId)
         {
@@ -35,17 +42,6 @@ namespace ITI.CryptoDatas.Managers
             }
             return false;
         }
-
-        /*public Wallet Edit(Wallet walletInput)
-        {
-            List<Wallet> wallets = GetFromDatabase();
-            Wallet wallet = wallets.First(x => x.id == walletInput.id);
-            if (wallet == null)
-                return null;
-
-        }*/
-
-
 
         private List<Wallet> GetFromDatabase()
         {
