@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using ITI.CryptoDatas.Managers;
 using ITI.CryptoDatas.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -23,17 +24,14 @@ namespace ITI.CryptoDatas.Controllers
     public class UsersController : Controller
     {
         private UsersManager _userManager;
-        private readonly IConfiguration _configuration;
 
-        public UsersController(IConfiguration config, UsersManager usersManager)
+        public UsersController(UsersManager usersManager)
         {
-            _configuration = config;
-            _key = _configuration.GetValue<string>("Token:Secret");
             _userManager = usersManager;
         }
 
-
         [HttpPost("login")]
+        [AllowAnonymous]
         public ActionResult<User> Login([FromBody]User userData)
         {
            if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return null;
@@ -41,6 +39,7 @@ namespace ITI.CryptoDatas.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public ActionResult<User> Register([FromBody]User userData)
         {
             if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return null;
@@ -48,6 +47,7 @@ namespace ITI.CryptoDatas.Controllers
         }
 
         [HttpDelete]
+        [Authorize]
         public ActionResult<bool> Delete(string username)
         {
             if (string.IsNullOrEmpty(username)) return false;
@@ -55,6 +55,7 @@ namespace ITI.CryptoDatas.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         public ActionResult<bool> Edit(User userInput)
         {
             if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return false;
@@ -62,6 +63,7 @@ namespace ITI.CryptoDatas.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public ActionResult<User> GetUser(string username)
         {
             if (string.IsNullOrEmpty(username)) return null;

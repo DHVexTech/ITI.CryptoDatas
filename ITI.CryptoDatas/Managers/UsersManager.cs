@@ -50,12 +50,13 @@ namespace ITI.CryptoDatas.Managers
 
         public User Register(User userInput)
         {
-            if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return null;
+            //if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return null;
             List<User> users = GetFromDatabase();
-            User user = users.First(x => x.Username == userInput.Username);
-            if (users.First(x => x.Username == userInput.Username) != null)
+            User user = users.FirstOrDefault(x => x.Username == userInput.Username);
+            if (user != null)
                 return null;
-            userInput = Authenticate(user);
+            userInput = Authenticate(userInput);
+            userInput.Password = EncryptePassword(userInput.Password);
             users.Add(userInput);
             WriteInDatabase(users);
             return null;
@@ -95,6 +96,7 @@ namespace ITI.CryptoDatas.Managers
         public bool Edit(User userInput)
         {
             if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return false;
+            userInput.Password = EncryptePassword(userInput.Password);
             List<User> users = GetFromDatabase();
             User user = users.First(x => x.Username == userInput.Username && x.Password == userInput.Password);
             if (user == null)
