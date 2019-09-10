@@ -41,26 +41,16 @@ namespace ITI.CryptoDatas.Managers
             return true;
         }
 
-        public Wallet Refund(Wallet refundProps, string username)
+        public Wallet ManageFund(Wallet refundProps, string username, string @operator)
         {
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
             User currentUser = _userManager.GetUser(username);
             Wallet walletSelected = wallets.Single(x => x.CryptoName == refundProps.CryptoName && currentUser.Wallets.Contains(x.Id));
             wallets.Remove(walletSelected);
-            walletSelected.Fund += refundProps.Fund;
-            wallets.Add(walletSelected);
-            JsonHelper.WriteInDatabase<Wallet>(wallets, _databaseName);
-            walletSelected.Id = 0;
-            return walletSelected;
-        }
-
-        public Wallet RemoveFund(Wallet refundProps, string username)
-        {
-            List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
-            User currentUser = _userManager.GetUser(username);
-            Wallet walletSelected = wallets.Single(x => x.CryptoName == refundProps.CryptoName && currentUser.Wallets.Contains(x.Id));
-            wallets.Remove(walletSelected);
-            walletSelected.Fund -= refundProps.Fund;
+            if (@operator == "+")
+                walletSelected.Fund -= refundProps.Fund;
+            else
+                walletSelected.Fund += refundProps.Fund;
             wallets.Add(walletSelected);
             JsonHelper.WriteInDatabase<Wallet>(wallets, _databaseName);
             walletSelected.Id = 0;
@@ -79,7 +69,7 @@ namespace ITI.CryptoDatas.Managers
             return false;
         }
 
-        private void GetUserWallet(string username, string crypto)
+        private Wallet GetUserWallet(string username, string crypto)
         {
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
             User currentUser = _userManager.GetUser(username);
