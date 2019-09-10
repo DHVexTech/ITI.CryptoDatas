@@ -52,21 +52,12 @@ namespace ITI.CryptoDatas.Controllers
             return _userManager.Delete(username);
         }
 
-        //[HttpPut]
-        //public ActionResult<bool> Edit(string username, string password)
-        //{
-        //    if (String.IsNullOrEmpty(username) || String.IsNullOrEmpty(password)) return false;
-        //    var array = JArray.Parse(this.url);
-        //    var item = this.ToFind(username);
-        //    array.Remove(item.Value);
-        //    var itemToAdd = new JObject();
-        //    itemToAdd["username"] = username;
-        //    itemToAdd["password"] = password;
-        //    array.Add(itemToAdd);
-        //    var jsonToOutput = JsonConvert.SerializeObject(array, Formatting.Indented);
-        //    System.IO.File.AppendAllText(this.url, jsonToOutput);
-        //    return true;
-        //}
+        [HttpPut]
+        public ActionResult<bool> Edit(User userInput)
+        {
+            if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return false;
+            return _userManager.Edit(userInput)
+        }
 
         [HttpGet]
         public ActionResult<User> GetUser(string username)

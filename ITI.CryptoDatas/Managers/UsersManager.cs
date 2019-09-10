@@ -61,18 +61,20 @@ namespace ITI.CryptoDatas.Managers
             return false;
         }
 
-        //public User Edit(User userInput)
-        //{
-        //    if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return false;
-        //    List<User> users = GetFromDatabase();
-        //    User user = users.First(x => x.Username == userInput.Username && x.Password == userInput.Password);
-        //    if (user == null)
-        //        return null;
+        public bool Edit(User userInput)
+        {
+            if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return false;
+            List<User> users = GetFromDatabase();
+            User user = users.First(x => x.Username == userInput.Username && x.Password == userInput.Password);
+            if (user == null)
+                return false;
+            // TODO : remove wallet
+            users.Remove(userInput);
+            WriteInDatabase(users);
+            return true;
+        }
 
 
-        //}
-
-        
 
         private List<User> GetFromDatabase()
         {
