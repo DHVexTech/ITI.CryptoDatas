@@ -1,4 +1,5 @@
-﻿using ITI.CryptoDatas.Helpers;
+﻿using ITI.CryptoDatas.Enums;
+using ITI.CryptoDatas.Helpers;
 using ITI.CryptoDatas.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -22,12 +23,14 @@ namespace ITI.CryptoDatas.Managers
         private readonly IConfiguration _config;
         private readonly string _key; 
         private readonly string _databaseName;
+        private readonly WalletsManager _walletsManager;
 
         public UsersManager(IConfiguration config)
         {
             _config = config;
             _key = _config["Token:Secret"];
             _databaseName = "users";
+            _walletsManager = new WalletsManager(this);
         }
 
         public User GetUser(string username)
@@ -61,7 +64,7 @@ namespace ITI.CryptoDatas.Managers
             userInput = Authenticate(userInput);
             userInput.Password = EncryptionHelper.EncryptePassword(userInput.Password);
             users.Add(userInput);
-            // TODO : Add wallet
+            user.Wallets = _walletsManager.Create();
             JsonHelper.WriteInDatabase<User>(users, _databaseName);
             return null;
         }

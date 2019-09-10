@@ -1,4 +1,5 @@
-﻿using ITI.CryptoDatas.Helpers;
+﻿using ITI.CryptoDatas.Enums;
+using ITI.CryptoDatas.Helpers;
 using ITI.CryptoDatas.Models;
 using Newtonsoft.Json;
 using System;
@@ -21,6 +22,22 @@ namespace ITI.CryptoDatas.Managers
             _databaseName = "wallets";
         }
 
+        public List<int> Create()
+        {
+            List<int> list = new List<int>();
+            foreach (var item in Enum.GetNames(typeof(CryptoEnum)))
+                if (item != "none")
+                {
+                    Wallet currentWallet = new Wallet();
+                    currentWallet.CryptoName = item;
+                    currentWallet.Fund = 0;
+                    currentWallet.Id = GetLastWallet().Id + 1;
+                    Add(currentWallet);
+                    list.Add(currentWallet.Id);
+                }
+            return list;
+        }
+
         public Wallet GetWallet(int walletId)
         {
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
@@ -31,6 +48,11 @@ namespace ITI.CryptoDatas.Managers
                     return wallet;
             }
             return null;
+        }
+
+        public Wallet GetLastWallet() {
+            List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
+            return wallets[wallets.Count - 1];
         }
 
         public bool Add (Wallet wallet) 
