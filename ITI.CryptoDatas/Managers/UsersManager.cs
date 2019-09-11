@@ -91,7 +91,7 @@ namespace ITI.CryptoDatas.Managers
             User user = users.First(x => x.Username == username);
             if (users.Remove(user))
             {
-                user.Wallets.ForEach(x => _walletsManager.Delete(x));
+                if(user.Wallets != null) user.Wallets.ForEach(x => _walletsManager.Delete(x));
                 JsonHelper.WriteInDatabase<User>(users, _databaseName);
                 return true;
             }
@@ -105,7 +105,10 @@ namespace ITI.CryptoDatas.Managers
             User user = users.First(x => x.Username == userInput.Username && x.Password == userInput.Password);
             if (user == null)
                 return false;
-            users.Remove(userInput);
+            users.Remove(user);
+            user.Firstname = userInput.Firstname;
+            user.Lastname = userInput.Lastname;
+            users.Add(userInput);
             JsonHelper.WriteInDatabase<User>(users, _databaseName);
             return true;
         }

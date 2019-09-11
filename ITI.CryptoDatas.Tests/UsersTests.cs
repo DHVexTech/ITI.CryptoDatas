@@ -28,7 +28,7 @@ namespace ITI.CryptoDatas.Tests
             var builder = new WebHostBuilder()
                           .UseEnvironment("Development")
                           .UseStartup<Startup>();
-            
+
             TestServer server = new TestServer(builder);
             _client = server.CreateClient();
             _client.DefaultRequestHeaders.Clear();
@@ -51,7 +51,7 @@ namespace ITI.CryptoDatas.Tests
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
             request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             var response = await _client.SendAsync(request);
-            
+
             List<User> users = JsonHelper.GetFromDatabase<User>("users");
             User userGetted = users.Single(x => x.Username == user.Username);
 
@@ -86,7 +86,7 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("pupu", "spsppspspsps")]
         public async Task user_can_login(string username, string password)
         {
-            User user = new User(){Username = username,Password = password};
+            User user = new User() { Username = username, Password = password };
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
             request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
@@ -108,11 +108,65 @@ namespace ITI.CryptoDatas.Tests
 
         //}
 
-        //[Test]
-        //public void can_edit_and_remove_an_user()
-        //{
+        [TestCase("username", "firstname", "lastname", "password")]
+        [TestCase("username2", "firstname2", "lastname2", "password2")]
+        [TestCase("username3", "firstname3", "lastname3", "password3")]
+        [TestCase("username4", "firstname4", "lastname4", "password4")]
+        public async Task can_edit_and_remove_an_user(string username, string firstname, string lastname, string password)
+        {
+            if(_client.DefaultRequestHeaders.Contains("Authorization")) _client.DefaultRequestHeaders.Remove("Authorization");
+            User user = new User()
+            {
+                Username = username,
+                Firstname = firstname,
+                Lastname = lastname,
+                Password = password
+            };
 
-        //}
+            // REGISTER
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
+            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+            var response = await _client.SendAsync(request);
+
+            List<User> users = JsonHelper.GetFromDatabase<User>("users");
+            User userGetted = users.Single(x => x.Username == user.Username);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.That(userGetted.Firstname, Is.EqualTo(user.Firstname));
+            Assert.That(userGetted.Lastname, Is.EqualTo(user.Lastname));
+
+
+            // LOGIN
+            request = new HttpRequestMessage(HttpMethod.Post, "api/users/login");
+            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+            response = await _client.SendAsync(request);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            // EDIT
+            // TODO -> RAJOUTER TOKEN
+            request = new HttpRequestMessage(HttpMethod.Put, "api/users/");
+            _client.DefaultRequestHeaders.Add("Authorization", "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InRhdGEiLCJuYmYiOjE1NjgxMDUwMjIsImV4cCI6MTU2ODcwOTgyMiwiaWF0IjoxNTY4MTA1MDIyfQ._L7HNlNX3NO99ED-h2368Lssh9Pgw9nvDmiE0LyL9V4");
+            user.Lastname = "LastNameYolo";
+            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+            response = await _client.SendAsync(request);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            users = JsonHelper.GetFromDatabase<User>("users");
+            userGetted = users.Single(x => x.Username == user.Username);
+            Assert.AreEqual(userGetted.Lastname, user.Lastname);
+
+
+            // DELETE
+            request = new HttpRequestMessage(HttpMethod.Delete, "api/users/?username=" + user.Username);
+            response = await _client.SendAsync(request);
+
+            users = JsonHelper.GetFromDatabase<User>("users");
+            Assert.AreEqual(users.Count, 0);
+
+
+            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
+
+        }
 
     }
 }
