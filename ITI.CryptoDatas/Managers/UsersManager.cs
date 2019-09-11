@@ -52,18 +52,19 @@ namespace ITI.CryptoDatas.Managers
             return Authenticate(user);
         }
 
-        public bool Register(User userInput)
+        public User Register(User userInput)
         {
             List<User> users = JsonHelper.GetFromDatabase<User>(_databaseName);
             User user = users.FirstOrDefault(x => x.Username == userInput.Username);
             if (user != null)
-                return false;
+                return null;
             userInput = Authenticate(userInput);
             userInput.Password = EncryptionHelper.EncryptePassword(userInput.Password);
             users.Add(userInput);
             userInput.Wallets = _walletsManager.Create();
             JsonHelper.WriteInDatabase<User>(users, _databaseName);
-            return true;
+            userInput.Password = null;
+            return userInput;
         }
 
         private User Authenticate(User user)
