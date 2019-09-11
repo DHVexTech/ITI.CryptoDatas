@@ -22,14 +22,9 @@ namespace ITI.CryptoDatas.Managers
 
         public List<int> Create()
         {
-
-
-
-
-
             List<int> list = new List<int>();
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
-            int id = wallets.Last().Id + 1;
+            int id = wallets.Count != 0 ? wallets.Last().Id + 1: 0;
             foreach (var item in Enum.GetNames(typeof(CryptoEnum)))
                 if (item != "None")
                 {
@@ -68,9 +63,9 @@ namespace ITI.CryptoDatas.Managers
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
             Wallet walletSelected = wallets.Single(x => x.CryptoName == refundProps.CryptoName && currentUser.Wallets.Contains(x.Id));
             if (@operator == "+")
-                walletSelected.Fund -= refundProps.Fund;
-            else
                 walletSelected.Fund += refundProps.Fund;
+            else
+                walletSelected.Fund -= refundProps.Fund;
             JsonHelper.WriteInDatabase<Wallet>(wallets, _databaseName);
             walletSelected.Id = 0;
             return walletSelected;
@@ -80,6 +75,12 @@ namespace ITI.CryptoDatas.Managers
         {
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
             return wallets.Where(x => user.Wallets.Contains(x.Id)).ToList();
+        }
+
+        public Wallet GetSpecificWallet(User user, string crypto)
+        {
+            List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
+            return wallets.First(x => user.Wallets.Contains(x.Id) && x.CryptoName == crypto);
         }
 
         public bool Delete(int walletId)

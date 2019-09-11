@@ -35,7 +35,7 @@ namespace ITI.CryptoDatas.Controllers
         {
             ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
             User user = _usersManager.GetUser(currentUsername.Name);
-            return _walletManager.ManageFund(wallet, user, "+");
+            return Json(_walletManager.ManageFund(wallet, user, "+"));
         }
 
         [HttpPut("removefund")]
@@ -44,7 +44,25 @@ namespace ITI.CryptoDatas.Controllers
         {
             ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
             User user = _usersManager.GetUser(currentUsername.Name);
-            return _walletManager.ManageFund(wallet, user, "-");
+            return Json(_walletManager.ManageFund(wallet, user, "-"));
+        }
+
+        [HttpGet]
+        [Authorize]
+        public ActionResult<List<Wallet>> GetUserWallets()
+        {
+            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
+            User user = _usersManager.GetUser(currentUsername.Name);
+            return Json(_walletManager.GetUserWallets(user));
+        }
+
+        [HttpGet("{crypto}")]
+        [Authorize]
+        public ActionResult<List<Wallet>> GetSpecificWallet(string crypto)
+        {
+            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
+            User user = _usersManager.GetUser(currentUsername.Name);
+            return Json(_walletManager.GetSpecificWallet(user, crypto));
         }
     }
 }

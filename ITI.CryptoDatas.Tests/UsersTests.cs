@@ -27,14 +27,7 @@ namespace ITI.CryptoDatas.Tests
 
         public UsersTests()
         {
-            var builder = new WebHostBuilder()
-                          .UseEnvironment("Development")
-                          .UseStartup<Startup>();
-
-            TestServer server = new TestServer(builder);
-            _client = server.CreateClient();
-            _client.DefaultRequestHeaders.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _client = TestsHelper.InitializeServer();
         }
 
         [TestCase("toto", "tata", "tutu", "tototutu")]
@@ -42,6 +35,8 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("tete", "tonton", null, "tytytytytyt")]
         public async Task can_create_an_user_and_save_in_database(string username, string firstname, string lastname, string password)
         {
+            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
+            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
             User user = new User()
             {
                 Username = username,
@@ -61,13 +56,14 @@ namespace ITI.CryptoDatas.Tests
             Assert.That(userGetted.Firstname, Is.EqualTo(user.Firstname));
             Assert.That(userGetted.Lastname, Is.EqualTo(user.Lastname));
             Assert.That(userGetted.Password, Is.Not.EqualTo(user.Password));
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
         }
 
         [TestCase("titi", "tatatatata", "titi", "tototototoo")]
         [TestCase("somename", "azerty", "somename", "123456")]
         public async Task return_unproccessable_entity_for_user_already_registered(string user1name, string user1pass, string user2name, string user2pass)
         {
+            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
+            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
             User user1 = new User() { Username = user1name, Password = user1pass };
             User user2 = new User() { Username = user2name, Password = user2pass };
 
@@ -80,7 +76,6 @@ namespace ITI.CryptoDatas.Tests
             HttpResponseMessage response = await _client.SendAsync(request);
 
             Assert.AreEqual(HttpStatusCode.UnprocessableEntity, response.StatusCode);
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
         }
 
         [TestCase("popo", "popopupup")]
@@ -88,6 +83,8 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("pupu", "spsppspspsps")]
         public async Task user_can_login(string username, string password)
         {
+            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
+            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
             User user = new User() { Username = username, Password = password };
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
@@ -102,13 +99,14 @@ namespace ITI.CryptoDatas.Tests
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.That(userResponse.Username, Is.EqualTo(username));
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
         }
 
         [TestCase("toto", "tototutu")]
         [TestCase("titi", "tatatatata")]
         public async Task can_get_jwt_token_when_login_and_register(string username, string password)
         {
+            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
+            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
             User user = new User() { Username = username, Password = password };
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
             request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
@@ -120,12 +118,11 @@ namespace ITI.CryptoDatas.Tests
 
             User resultRegister = JsonConvert.DeserializeObject<User>(responseRegister.Content.ReadAsStringAsync().Result);
             User resultLogin = JsonConvert.DeserializeObject<User>(responseLogin.Content.ReadAsStringAsync().Result);
-            string claimsUsernameLogin = GetUniqueNameToken(resultLogin.Token);
-            string claimsUsernameRegister = GetUniqueNameToken(resultRegister.Token);
+            string claimsUsernameLogin = TestsHelper.GetUniqueNameToken(resultLogin.Token);
+            string claimsUsernameRegister = TestsHelper.GetUniqueNameToken(resultRegister.Token);
 
             Assert.That(claimsUsernameLogin, Is.EqualTo(claimsUsernameRegister));
             Assert.That(resultRegister.Token, Is.Not.EqualTo(resultLogin.Token));
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
         }
 
         [TestCase("username", "firstname", "lastname", "password")]
@@ -135,6 +132,8 @@ namespace ITI.CryptoDatas.Tests
         public async Task can_edit_and_remove_an_user(string username, string firstname, string lastname, string password)
         {
             if(_client.DefaultRequestHeaders.Contains("Authorization")) _client.DefaultRequestHeaders.Remove("Authorization");
+            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
+            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
             User user = new User()
             {
                 Username = username,
@@ -166,14 +165,8 @@ namespace ITI.CryptoDatas.Tests
             response = await _client.SendAsync(request);
             users = JsonHelper.GetFromDatabase<User>("users");
             Assert.AreEqual(users.Count, 0);
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
         }
 
-        private string GetUniqueNameToken(string tokenString)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(tokenString);
-            return token.Claims.First(x => x.Type == "unique_name").Value;
-        }
+        
     }
 }
