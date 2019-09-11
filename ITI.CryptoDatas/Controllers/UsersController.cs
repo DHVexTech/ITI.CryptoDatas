@@ -42,9 +42,9 @@ namespace ITI.CryptoDatas.Controllers
         public ActionResult Register([FromBody]User userData)
         {
             if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return Forbid();
-            bool result = _userManager.Register(userData);
-            if (result)
-                return Ok();
+            User result = _userManager.Register(userData);
+            if (result != null)
+                return Json(result);
             else
                 return UnprocessableEntity();
         }

@@ -15,6 +15,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Text;
 using System.Net.Http.Headers;
+using System.IdentityModel.Tokens.Jwt;
+using System.Threading;
 
 namespace ITI.CryptoDatas.Tests
 {
@@ -100,13 +102,31 @@ namespace ITI.CryptoDatas.Tests
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.That(userResponse.Username, Is.EqualTo(username));
+            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
         }
 
-        //[Test]
-        //public void can_get_jwt_token_when_login_and_register()
-        //{
+        [TestCase("toto", "tototutu")]
+        [TestCase("titi", "tatatatata")]
+        public async Task can_get_jwt_token_when_login_and_register(string username, string password)
+        {
+            User user = new User() { Username = username, Password = password };
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
+            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+            HttpResponseMessage responseRegister = await _client.SendAsync(request);
+            Thread.Sleep(1000);
+            request = new HttpRequestMessage(HttpMethod.Post, "api/users/login");
+            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+            HttpResponseMessage responseLogin = await _client.SendAsync(request);
 
-        //}
+            User resultRegister = JsonConvert.DeserializeObject<User>(responseRegister.Content.ReadAsStringAsync().Result);
+            User resultLogin = JsonConvert.DeserializeObject<User>(responseLogin.Content.ReadAsStringAsync().Result);
+            string claimsUsernameLogin = GetUniqueNameToken(resultLogin.Token);
+            string claimsUsernameRegister = GetUniqueNameToken(resultRegister.Token);
+
+            Assert.That(claimsUsernameLogin, Is.EqualTo(claimsUsernameRegister));
+            Assert.That(resultRegister.Token, Is.Not.EqualTo(resultLogin.Token));
+            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
+        }
 
         //[Test]
         //public void can_edit_and_remove_an_user()
@@ -114,5 +134,11 @@ namespace ITI.CryptoDatas.Tests
 
         //}
 
+        private string GetUniqueNameToken(string tokenString)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(tokenString);
+            return token.Claims.First(x => x.Type == "unique_name").Value;
+        }
     }
 }
