@@ -147,45 +147,26 @@ namespace ITI.CryptoDatas.Tests
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
             request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             var response = await _client.SendAsync(request);
-
             List<User> users = JsonHelper.GetFromDatabase<User>("users");
             User userGetted = users.Single(x => x.Username == user.Username);
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-            Assert.That(userGetted.Firstname, Is.EqualTo(user.Firstname));
-            Assert.That(userGetted.Lastname, Is.EqualTo(user.Lastname));
-
-
-            // LOGIN
-            request = new HttpRequestMessage(HttpMethod.Post, "api/users/login");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            response = await _client.SendAsync(request);
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-
             // EDIT
-            // TODO -> RAJOUTER TOKEN
             request = new HttpRequestMessage(HttpMethod.Put, "api/users/");
-            _client.DefaultRequestHeaders.Add("Authorization", "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InRhdGEiLCJuYmYiOjE1NjgxMDUwMjIsImV4cCI6MTU2ODcwOTgyMiwiaWF0IjoxNTY4MTA1MDIyfQ._L7HNlNX3NO99ED-h2368Lssh9Pgw9nvDmiE0LyL9V4");
+            _client.DefaultRequestHeaders.Add("Authorization", "bearer " + userGetted.Token);
             user.Lastname = "LastNameYolo";
             request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             response = await _client.SendAsync(request);
-
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             users = JsonHelper.GetFromDatabase<User>("users");
             userGetted = users.Single(x => x.Username == user.Username);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.AreEqual(userGetted.Lastname, user.Lastname);
-
 
             // DELETE
             request = new HttpRequestMessage(HttpMethod.Delete, "api/users/?username=" + user.Username);
             response = await _client.SendAsync(request);
-
             users = JsonHelper.GetFromDatabase<User>("users");
             Assert.AreEqual(users.Count, 0);
-
-
             JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
-
         }
 
         private string GetUniqueNameToken(string tokenString)
