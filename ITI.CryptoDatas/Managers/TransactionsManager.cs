@@ -22,13 +22,14 @@ namespace ITI.CryptoDatas.Managers
         {
             transaction.UsernameGiver = usernameGiver;
             User receiver = _usersManager.GetUser(transaction.UsernameReceiver);
+            User giver = _usersManager.GetUser(usernameGiver);
             Wallet walletTransaction = new Wallet()
             {
                 CryptoName = transaction.Crypto,
                 Fund = transaction.Fund
             };
-            _walletsManager.ManageFund(walletTransaction, usernameGiver, "-");
-            _walletsManager.ManageFund(walletTransaction, transaction.UsernameReceiver, "+");
+            _walletsManager.ManageFund(walletTransaction, giver, "-");
+            _walletsManager.ManageFund(walletTransaction, receiver, "+");
 
             List<Transaction> transactions = JsonHelper.GetFromDatabase<Transaction>(_databaseName);
             transaction.Id = transactions.Last().Id + 1;

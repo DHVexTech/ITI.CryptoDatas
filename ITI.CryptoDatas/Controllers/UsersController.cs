@@ -30,23 +30,30 @@ namespace ITI.CryptoDatas.Controllers
         [AllowAnonymous]
         public ActionResult<User> Login([FromBody]User userData)
         {
-           if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return null;
-           return _userManager.Login(userData);
+            if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return Forbid();
+            User user = _userManager.Login(userData);
+            if (user == null)
+                return Forbid();
+            else
+                return Json(user);
         }
 
         [HttpPost("register")]
-        [AllowAnonymous]
-        public ActionResult<User> Register([FromBody]User userData)
+        public ActionResult Register([FromBody]User userData)
         {
-            if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return null;
-            return _userManager.Register(userData);
+            if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return Forbid();
+            bool result = _userManager.Register(userData);
+            if (result)
+                return Ok();
+            else
+                return UnprocessableEntity();
         }
 
         [HttpDelete]
         [Authorize]
         public ActionResult<bool> Delete(string username)
         {
-            if (string.IsNullOrEmpty(username)) return false;
+            if (string.IsNullOrEmpty(username)) return Forbid();
             return _userManager.Delete(username);
         }
 
@@ -54,7 +61,7 @@ namespace ITI.CryptoDatas.Controllers
         [Authorize]
         public ActionResult<bool> Edit(User userInput)
         {
-            if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return false;
+            if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return Forbid();
             return _userManager.Edit(userInput);
         }
 
@@ -62,7 +69,7 @@ namespace ITI.CryptoDatas.Controllers
         [Authorize]
         public ActionResult<User> GetUser(string username)
         {
-            if (string.IsNullOrEmpty(username)) return null;
+            if (string.IsNullOrEmpty(username)) return Forbid();
             return _userManager.GetUser(username);
         }
     }

@@ -2,6 +2,7 @@
 using ITI.CryptoDatas.Helpers;
 using ITI.CryptoDatas.Managers;
 using ITI.CryptoDatas.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -18,11 +19,12 @@ namespace ITI.CryptoDatas.Controllers
         public CryptosController()
         {
             _cryptosManager = new CryptosManager();
-            _apiKey = ConfigHelper.TokenSecret;
+            _apiKey = ConfigHelper.CoinMarketToken;
             _baseUri = ConfigHelper.CoinMarketUri;
         }
 
         [HttpGet("UpdateCryptoData/{crypto}")]
+        [AllowAnonymous]
         public async Task<Crypto> GetCryptoData(string crypto) => await _cryptosManager.GetCryptoData(_baseUri, _apiKey, crypto);
 
     }

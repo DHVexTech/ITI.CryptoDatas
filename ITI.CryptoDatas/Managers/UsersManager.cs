@@ -45,7 +45,6 @@ namespace ITI.CryptoDatas.Managers
 
         public User Login(User userInput)
         {
-            if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return null;
             userInput.Password = EncryptionHelper.EncryptePassword(userInput.Password);
             User user = GetUser(userInput.Username);
             if (user == null || user.Password != userInput.Password)
@@ -53,18 +52,18 @@ namespace ITI.CryptoDatas.Managers
             return Authenticate(user);
         }
 
-        public User Register(User userInput)
+        public bool Register(User userInput)
         {
             List<User> users = JsonHelper.GetFromDatabase<User>(_databaseName);
             User user = users.FirstOrDefault(x => x.Username == userInput.Username);
             if (user != null)
-                return null;
+                return false;
             userInput = Authenticate(userInput);
             userInput.Password = EncryptionHelper.EncryptePassword(userInput.Password);
             users.Add(userInput);
-            user.Wallets = _walletsManager.Create();    
+            userInput.Wallets = _walletsManager.Create();
             JsonHelper.WriteInDatabase<User>(users, _databaseName);
-            return null;
+            return true;
         }
 
         private User Authenticate(User user)
@@ -101,7 +100,6 @@ namespace ITI.CryptoDatas.Managers
 
         public bool Edit(User userInput)
         {
-            if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return false;
             userInput.Password = EncryptionHelper.EncryptePassword(userInput.Password);
             List<User> users = JsonHelper.GetFromDatabase<User>(_databaseName);
             User user = users.First(x => x.Username == userInput.Username && x.Password == userInput.Password);

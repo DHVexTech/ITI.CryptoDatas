@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ITI.CryptoDatas.Helpers
 {
-    public class ConfigHelper
+    public static class ConfigHelper
     {
         public static string TokenSecret
         {

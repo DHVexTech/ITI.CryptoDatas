@@ -12,7 +12,7 @@ namespace ITI.CryptoDatas.Helpers
     {
         public static List<T> GetFromDatabase<T>(string filename)
         {
-            using (StreamReader r = new StreamReader(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Databases\" + filename + ".json")))
+            using (StreamReader r = new StreamReader(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Databases\" + filename + ".json").Replace(".Tests", "")))
             {
                 string json = r.ReadToEnd();
                 return JsonConvert.DeserializeObject<List<T>>(json);
@@ -21,7 +21,7 @@ namespace ITI.CryptoDatas.Helpers
 
         public static void WriteInDatabase<T>(List<T> users, string filename)
         {
-            using (StreamWriter w = new StreamWriter(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Databases\" + filename + ".json")))
+            using (StreamWriter w = new StreamWriter(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Databases\" + filename + ".json").Replace(".Tests", "")))
             {
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.Serialize(w, users);

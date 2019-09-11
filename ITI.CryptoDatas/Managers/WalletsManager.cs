@@ -13,26 +13,30 @@ namespace ITI.CryptoDatas.Managers
 {
     public class WalletsManager
     {
-        public UsersManager _userManager;
         private readonly string _databaseName;
 
-        public WalletsManager(UsersManager userManager)
+        public WalletsManager()
         {
-            _userManager = userManager;
             _databaseName = "wallets";
         }
 
         public List<int> Create()
         {
+
+
+
+
+
             List<int> list = new List<int>();
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
+            int id = wallets.Last().Id + 1;
             foreach (var item in Enum.GetNames(typeof(CryptoEnum)))
-                if (item != "none")
+                if (item != "None")
                 {
                     Wallet currentWallet = new Wallet();
                     currentWallet.CryptoName = item;
                     currentWallet.Fund = 0;
-                    currentWallet.Id = wallets.Last().Id + 1;
+                    currentWallet.Id = id++;
                     Add(currentWallet);
                     list.Add(currentWallet.Id);
                 }
@@ -59,10 +63,9 @@ namespace ITI.CryptoDatas.Managers
             return true;
         }
 
-        public Wallet ManageFund(Wallet refundProps, string username, string @operator)
+        public Wallet ManageFund(Wallet refundProps, User currentUser, string @operator)
         {
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
-            User currentUser = _userManager.GetUser(username);
             Wallet walletSelected = wallets.Single(x => x.CryptoName == refundProps.CryptoName && currentUser.Wallets.Contains(x.Id));
             if (@operator == "+")
                 walletSelected.Fund -= refundProps.Fund;
@@ -91,11 +94,11 @@ namespace ITI.CryptoDatas.Managers
             return false;
         }
 
-        private Wallet GetUserWallet(string username, string crypto)
-        {
-            List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
-            User currentUser = _userManager.GetUser(username);
-            return wallets.Single(x => x.CryptoName == crypto && currentUser.Wallets.Contains(x.Id));
-        }
+        //private Wallet GetUserWallet(string username, string crypto)
+        //{
+        //    List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
+        //    User currentUser = _userManager.GetUser(username);
+        //    return wallets.Single(x => x.CryptoName == crypto && currentUser.Wallets.Contains(x.Id));
+        //}
     }
 }
