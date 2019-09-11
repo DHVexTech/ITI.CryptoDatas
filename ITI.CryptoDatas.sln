@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.705
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITI.CryptoDatas", "ITI.CryptoDatas\ITI.CryptoDatas.csproj", "{D1C9A165-2DA1-40A0-8A44-4ED183F2650A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ITI.CryptoDatas", "ITI.CryptoDatas\ITI.CryptoDatas.csproj", "{D1C9A165-2DA1-40A0-8A44-4ED183F2650A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ITI.CryptoDatas.Tests", "ITI.CryptoDatas.Tests\ITI.CryptoDatas.Tests.csproj", "{9CEF4411-8165-4127-BA9F-4680A4EB7B9A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{D1C9A165-2DA1-40A0-8A44-4ED183F2650A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1C9A165-2DA1-40A0-8A44-4ED183F2650A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1C9A165-2DA1-40A0-8A44-4ED183F2650A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CEF4411-8165-4127-BA9F-4680A4EB7B9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CEF4411-8165-4127-BA9F-4680A4EB7B9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CEF4411-8165-4127-BA9F-4680A4EB7B9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CEF4411-8165-4127-BA9F-4680A4EB7B9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
