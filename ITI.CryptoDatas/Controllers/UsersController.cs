@@ -15,10 +15,6 @@ using Newtonsoft.Json.Linq;
 
 namespace ITI.CryptoDatas.Controllers
 {
-    interface dataUser
-    {
-        List<User> Users { get; set; }
-    }
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : Controller

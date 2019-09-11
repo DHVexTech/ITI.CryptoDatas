@@ -12,14 +12,13 @@ namespace ITI.CryptoDatas.Controllers
     public class TransactionsController : Controller
     {
         private readonly TransactionsManager _transactionManager;
-        private object _walletManager;
 
         public TransactionsController(TransactionsManager transactionsManager)
         {
             _transactionManager = transactionsManager;
         }
 
-        [HttpPost("removefund")]
+        [HttpPost("give")]
         [Authorize]
         public ActionResult<Transaction> Give([FromBody]Transaction transaction)
         {

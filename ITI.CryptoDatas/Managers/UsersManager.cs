@@ -20,17 +20,15 @@ namespace ITI.CryptoDatas.Managers
 {
     public class UsersManager
     {
-        private readonly IConfiguration _config;
         private readonly string _key; 
         private readonly string _databaseName;
         private readonly WalletsManager _walletsManager;
 
-        public UsersManager(IConfiguration config)
+        public UsersManager(WalletsManager walletsManager)
         {
-            _config = config;
-            _key = _config["Token:Secret"];
+            _key = ConfigHelper.TokenSecret;
             _databaseName = "users";
-            _walletsManager = new WalletsManager(this);
+            _walletsManager = walletsManager;
         }
 
         public User GetUser(string username)
@@ -64,7 +62,7 @@ namespace ITI.CryptoDatas.Managers
             userInput = Authenticate(userInput);
             userInput.Password = EncryptionHelper.EncryptePassword(userInput.Password);
             users.Add(userInput);
-            user.Wallets = _walletsManager.Create();
+            user.Wallets = _walletsManager.Create();    
             JsonHelper.WriteInDatabase<User>(users, _databaseName);
             return null;
         }
@@ -94,6 +92,7 @@ namespace ITI.CryptoDatas.Managers
             User user = users.First(x => x.Username == username);
             if (users.Remove(user))
             {
+                user.Wallets.ForEach(x => _walletsManager.Delete(x));
                 JsonHelper.WriteInDatabase<User>(users, _databaseName);
                 return true;
             }
@@ -108,7 +107,6 @@ namespace ITI.CryptoDatas.Managers
             User user = users.First(x => x.Username == userInput.Username && x.Password == userInput.Password);
             if (user == null)
                 return false;
-            // TODO : remove wallet
             users.Remove(userInput);
             JsonHelper.WriteInDatabase<User>(users, _databaseName);
             return true;

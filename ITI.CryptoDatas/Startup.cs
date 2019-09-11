@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ITI.CryptoDatas.Managers;
+using ITI.CryptoDatas.Helpers;
 
 namespace ITI.CryptoDatas
 {
@@ -24,7 +25,7 @@ namespace ITI.CryptoDatas
         {
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            var key = Encoding.ASCII.GetBytes(Configuration["Token:Secret"]);
+            var key = Encoding.ASCII.GetBytes(ConfigHelper.TokenSecret);
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
