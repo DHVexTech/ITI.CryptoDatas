@@ -35,8 +35,7 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("tete", "tonton", null, "tytytytytyt")]
         public async Task can_create_an_user_and_save_in_database(string username, string firstname, string lastname, string password)
         {
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
-            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
+            TestsHelper.ClearDatabases();
             User user = new User()
             {
                 Username = username,
@@ -62,8 +61,8 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("somename", "azerty", "somename", "123456")]
         public async Task return_unproccessable_entity_for_user_already_registered(string user1name, string user1pass, string user2name, string user2pass)
         {
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
-            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
+            TestsHelper.ClearDatabases();
+
             User user1 = new User() { Username = user1name, Password = user1pass };
             User user2 = new User() { Username = user2name, Password = user2pass };
 
@@ -83,8 +82,8 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("pupu", "spsppspspsps")]
         public async Task user_can_login(string username, string password)
         {
-            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
+            TestsHelper.ClearDatabases();
+
             User user = new User() { Username = username, Password = password };
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
@@ -105,8 +104,8 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("titi", "tatatatata")]
         public async Task can_get_jwt_token_when_login_and_register(string username, string password)
         {
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
-            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
+            TestsHelper.ClearDatabases();
+
             User user = new User() { Username = username, Password = password };
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
             request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
@@ -132,8 +131,8 @@ namespace ITI.CryptoDatas.Tests
         public async Task can_edit_and_remove_an_user(string username, string firstname, string lastname, string password)
         {
             if(_client.DefaultRequestHeaders.Contains("Authorization")) _client.DefaultRequestHeaders.Remove("Authorization");
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
-            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
+            TestsHelper.ClearDatabases();
+
             User user = new User()
             {
                 Username = username,

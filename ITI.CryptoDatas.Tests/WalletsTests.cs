@@ -26,8 +26,8 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("titi", "tatatatata")]
         public async Task initialize_wallet_when_a_user_is_created(string username, string password)
         {
-            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
+            TestsHelper.ClearDatabases();
+
             User user = new User() { Username = username, Password = password };
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
@@ -51,8 +51,7 @@ namespace ITI.CryptoDatas.Tests
         public async Task add_and_remove_fund(string username, string password, string crypto, double amount)
         {
             if (_client.DefaultRequestHeaders.Contains("Authorization")) _client.DefaultRequestHeaders.Remove("Authorization");
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
-            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
+            TestsHelper.ClearDatabases();
 
             User user = new User() { Username = username, Password = password };
             Wallet wallet = new Wallet() { CryptoName = crypto, Fund = amount };
@@ -88,8 +87,7 @@ namespace ITI.CryptoDatas.Tests
         public async Task remove_all_wallets_when_an_user_is_deleted(string username, string password)
         {
             if (_client.DefaultRequestHeaders.Contains("Authorization")) _client.DefaultRequestHeaders.Remove("Authorization");
-            JsonHelper.WriteInDatabase<User>(new List<User>(), "users");
-            JsonHelper.WriteInDatabase<Wallet>(new List<Wallet>(), "wallets");
+            TestsHelper.ClearDatabases();
 
             User user = new User() { Username = username, Password = password };
 
@@ -110,11 +108,5 @@ namespace ITI.CryptoDatas.Tests
 
             Assert.That(wallets.Count, Is.EqualTo(0));
         }
-
-        //[Test]
-        //public void create_custom_wallet_with_new_crypto()
-        //{
-
-        //}
     }
 }
