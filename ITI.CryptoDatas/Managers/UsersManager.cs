@@ -101,9 +101,8 @@ namespace ITI.CryptoDatas.Managers
 
         public bool Edit(User userInput)
         {
-            userInput.Password = EncryptionHelper.EncryptePassword(userInput.Password);
             List<User> users = JsonHelper.GetFromDatabase<User>(_databaseName);
-            User user = users.First(x => x.Username == userInput.Username && x.Password == userInput.Password);
+            User user = users.First(x => x.Username == userInput.Username);
             if (user == null)
                 return false;
             users.Remove(user);

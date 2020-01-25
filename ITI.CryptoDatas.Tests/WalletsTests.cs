@@ -26,13 +26,12 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("titi", "tatatatata")]
         public async Task initialize_wallet_when_a_user_is_created(string username, string password)
         {
+            if (_client.DefaultRequestHeaders.Contains("Authorization")) _client.DefaultRequestHeaders.Remove("Authorization");
             TestsHelper.ClearDatabases();
 
             User user = new User() { Username = username, Password = password };
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            var response = await _client.SendAsync(request);
+            var response = await TestsHelper.SendRequest(_client, user, "api/users/register", HttpMethod.Post);
 
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>("wallets");
             List<User> users = JsonHelper.GetFromDatabase<User>("users");
@@ -56,27 +55,20 @@ namespace ITI.CryptoDatas.Tests
             User user = new User() { Username = username, Password = password };
             Wallet wallet = new Wallet() { CryptoName = crypto, Fund = amount };
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            var responseUser = await _client.SendAsync(request);
-            user = JsonConvert.DeserializeObject<User>(responseUser.Content.ReadAsStringAsync().Result);
+            var response = await TestsHelper.SendRequest(_client, user, "api/users/register", HttpMethod.Post);
+            user = JsonConvert.DeserializeObject<User>(await response.Content.ReadAsStringAsync());
 
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>("wallets");
-            request = new HttpRequestMessage(HttpMethod.Put, "api/wallets/refund");
-            request.Content = new StringContent(JsonConvert.SerializeObject(wallet), Encoding.UTF8, "application/json");
             _client.DefaultRequestHeaders.Add("Authorization", "bearer " + user.Token);
-            var response = await _client.SendAsync(request);
+            response = await TestsHelper.SendRequest(_client, wallet, "api/wallets/refund", HttpMethod.Put);
 
-            request = new HttpRequestMessage(HttpMethod.Get, "api/wallets/" + crypto);
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            response = await _client.SendAsync(request);
+            response = await TestsHelper.SendRequest(_client, user, "api/wallets/" + crypto, HttpMethod.Get);
             Wallet userWallet = JsonConvert.DeserializeObject<Wallet>(response.Content.ReadAsStringAsync().Result);
 
             Assert.That(userWallet.Fund, Is.EqualTo(amount));
 
-            request = new HttpRequestMessage(HttpMethod.Put, "api/wallets/removeFund");
-            request.Content = new StringContent(JsonConvert.SerializeObject(wallet), Encoding.UTF8, "application/json");
-            response = await _client.SendAsync(request);
+            response = await TestsHelper.SendRequest(_client, wallet, "api/wallets/removeFund", HttpMethod.Put);
+
             userWallet = JsonConvert.DeserializeObject<Wallet>(response.Content.ReadAsStringAsync().Result);
 
             Assert.That(userWallet.Fund, Is.EqualTo(0));
@@ -91,18 +83,14 @@ namespace ITI.CryptoDatas.Tests
 
             User user = new User() { Username = username, Password = password };
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            var response = await _client.SendAsync(request);
+            var response = await TestsHelper.SendRequest(_client, user, "api/users/register", HttpMethod.Post);
             user = JsonConvert.DeserializeObject<User>(response.Content.ReadAsStringAsync().Result);
             List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>("wallets");
 
             Assert.That(wallets.Count, Is.Not.EqualTo(0));
 
-            request = new HttpRequestMessage(HttpMethod.Delete, "api/users?username=" + user.Username);
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             _client.DefaultRequestHeaders.Add("Authorization", "bearer " + user.Token);
-            response = await _client.SendAsync(request);
+            response = await TestsHelper.SendRequest(_client, user, "api/users/", HttpMethod.Delete);
 
             wallets = JsonHelper.GetFromDatabase<Wallet>("wallets");
 

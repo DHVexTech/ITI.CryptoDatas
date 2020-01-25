@@ -3,7 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using ITI.CryptoDatas.Managers;
 using ITI.CryptoDatas.Models;
@@ -51,17 +54,18 @@ namespace ITI.CryptoDatas.Controllers
 
         [HttpDelete]
         [Authorize]
-        public ActionResult<bool> Delete(string username)
+        public ActionResult<bool> Delete()
         {
-            if (string.IsNullOrEmpty(username)) return Forbid();
-            return _userManager.Delete(username);
+            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
+            return _userManager.Delete(currentUsername.Name);
         }
 
         [HttpPut]
         [Authorize]
         public ActionResult<bool> Edit(User userInput)
         {
-            if (string.IsNullOrEmpty(userInput.Username) || string.IsNullOrEmpty(userInput.Password)) return Forbid();
+            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
+            if (userInput.Username != currentUsername.Name) return false;
             return _userManager.Edit(userInput);
         }
 

@@ -35,7 +35,9 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("tete", "tonton", null, "tytytytytyt")]
         public async Task can_create_an_user_and_save_in_database(string username, string firstname, string lastname, string password)
         {
+            if (_client.DefaultRequestHeaders.Contains("Authorization")) _client.DefaultRequestHeaders.Remove("Authorization");
             TestsHelper.ClearDatabases();
+
             User user = new User()
             {
                 Username = username,
@@ -44,9 +46,7 @@ namespace ITI.CryptoDatas.Tests
                 Password = password
             };
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            var response = await _client.SendAsync(request);
+            var response = await TestsHelper.SendRequest(_client, user, "api/users/register", HttpMethod.Post);
 
             List<User> users = JsonHelper.GetFromDatabase<User>("users");
             User userGetted = users.Single(x => x.Username == user.Username);
@@ -61,18 +61,14 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("somename", "azerty", "somename", "123456")]
         public async Task return_unproccessable_entity_for_user_already_registered(string user1name, string user1pass, string user2name, string user2pass)
         {
+            if (_client.DefaultRequestHeaders.Contains("Authorization")) _client.DefaultRequestHeaders.Remove("Authorization");
             TestsHelper.ClearDatabases();
 
             User user1 = new User() { Username = user1name, Password = user1pass };
             User user2 = new User() { Username = user2name, Password = user2pass };
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user1), Encoding.UTF8, "application/json");
-            await _client.SendAsync(request);
-
-            request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user2), Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await _client.SendAsync(request);
+            await TestsHelper.SendRequest(_client, user1, "api/users/register", HttpMethod.Post);
+            var response = await TestsHelper.SendRequest(_client, user2, "api/users/register", HttpMethod.Post);
 
             Assert.AreEqual(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
@@ -82,19 +78,14 @@ namespace ITI.CryptoDatas.Tests
         [TestCase("pupu", "spsppspspsps")]
         public async Task user_can_login(string username, string password)
         {
+            if (_client.DefaultRequestHeaders.Contains("Authorization")) _client.DefaultRequestHeaders.Remove("Authorization");
             TestsHelper.ClearDatabases();
 
             User user = new User() { Username = username, Password = password };
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            await _client.SendAsync(request);
-            request = new HttpRequestMessage(HttpMethod.Post, "api/users/login");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await _client.SendAsync(request);
-            string result = response.Content.ReadAsStringAsync().Result;
-
-            User userResponse = JsonConvert.DeserializeObject<User>(result);
+            await TestsHelper.SendRequest(_client, user, "api/users/register", HttpMethod.Post);
+            var response = await TestsHelper.SendRequest(_client, user, "api/users/login", HttpMethod.Post);
+            User userResponse = JsonConvert.DeserializeObject<User>(await response.Content.ReadAsStringAsync());
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.That(userResponse.Username, Is.EqualTo(username));
@@ -107,16 +98,12 @@ namespace ITI.CryptoDatas.Tests
             TestsHelper.ClearDatabases();
 
             User user = new User() { Username = username, Password = password };
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            HttpResponseMessage responseRegister = await _client.SendAsync(request);
-            Thread.Sleep(1000);
-            request = new HttpRequestMessage(HttpMethod.Post, "api/users/login");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            HttpResponseMessage responseLogin = await _client.SendAsync(request);
 
-            User resultRegister = JsonConvert.DeserializeObject<User>(responseRegister.Content.ReadAsStringAsync().Result);
-            User resultLogin = JsonConvert.DeserializeObject<User>(responseLogin.Content.ReadAsStringAsync().Result);
+            var responseRegister = await TestsHelper.SendRequest(_client, user, "api/users/register", HttpMethod.Post);
+            var responseLogin = await TestsHelper.SendRequest(_client, user, "api/users/login", HttpMethod.Post);
+
+            User resultRegister = JsonConvert.DeserializeObject<User>(await responseRegister.Content.ReadAsStringAsync());
+            User resultLogin = JsonConvert.DeserializeObject<User>(await responseLogin.Content.ReadAsStringAsync());
             string claimsUsernameLogin = TestsHelper.GetUniqueNameToken(resultLogin.Token);
             string claimsUsernameRegister = TestsHelper.GetUniqueNameToken(resultRegister.Token);
 
@@ -142,26 +129,23 @@ namespace ITI.CryptoDatas.Tests
             };
 
             // REGISTER
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/users/register");
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            var response = await _client.SendAsync(request);
+            var response = await TestsHelper.SendRequest(_client, user, "api/users/register", HttpMethod.Post);
             List<User> users = JsonHelper.GetFromDatabase<User>("users");
             User userGetted = users.Single(x => x.Username == user.Username);
 
             // EDIT
-            request = new HttpRequestMessage(HttpMethod.Put, "api/users/");
             _client.DefaultRequestHeaders.Add("Authorization", "bearer " + userGetted.Token);
             user.Lastname = "LastNameYolo";
-            request.Content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            response = await _client.SendAsync(request);
+            response = await TestsHelper.SendRequest(_client, user, "api/users/", HttpMethod.Put);
+
             users = JsonHelper.GetFromDatabase<User>("users");
             userGetted = users.Single(x => x.Username == user.Username);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.AreEqual(userGetted.Lastname, user.Lastname);
 
             // DELETE
-            request = new HttpRequestMessage(HttpMethod.Delete, "api/users/?username=" + user.Username);
-            response = await _client.SendAsync(request);
+            response = await TestsHelper.SendRequest(_client, user, "api/users/", HttpMethod.Delete);
+
             users = JsonHelper.GetFromDatabase<User>("users");
             Assert.AreEqual(users.Count, 0);
         }
