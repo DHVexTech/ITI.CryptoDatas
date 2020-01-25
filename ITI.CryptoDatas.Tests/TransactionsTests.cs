@@ -9,7 +9,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ITI.CryptoData.Tests
+namespace ITI.CryptoDatas.Tests
 {
     [TestFixture]
     public class TransactionsTests
@@ -33,23 +33,25 @@ namespace ITI.CryptoData.Tests
             Wallet fundUser1 = new Wallet() { CryptoName = crypto, Fund = 100 };
             Transaction transaction = new Transaction() { Crypto = crypto, Fund = amount, UsernameGiver = user1.Username, UsernameReceiver = user2.Username };
 
-            var response = await TestsHelper.SendRequest(_client, user1, "api/users/register");
+            var responseUser1 = await TestsHelper.SendRequest(_client, user1, "api/users/register");
+            user1 = JsonConvert.DeserializeObject<User>(await responseUser1.Content.ReadAsStringAsync());
             // get user
-           response = await TestsHelper.SendRequest(_client, user2, "api/users/register");
+            var responseUser2 = await TestsHelper.SendRequest(_client, user2, "api/users/register");
+            user2 = JsonConvert.DeserializeObject<User>(await responseUser2.Content.ReadAsStringAsync());
             // get user 2
             _client.DefaultRequestHeaders.Add("Authorization", "bearer " + user1.Token);
-            await TestsHelper.SendRequest(_client, fundUser1, "api/wallets/refund");
+            await TestsHelper.SendRequest(_client, fundUser1, "api/wallets/refund", HttpMethod.Put);
             await TestsHelper.SendRequest(_client, transaction, "api/transactions/give");
-            response = await TestsHelper.SendRequest(_client, transaction, "api/wallets/" + crypto);
+            var responseWallet = await TestsHelper.SendRequest(_client, null, "api/wallets/" + crypto, HttpMethod.Get);
+            fundUser1 = JsonConvert.DeserializeObject<Wallet>(await responseWallet.Content.ReadAsStringAsync());
 
+            _client.DefaultRequestHeaders.Clear();
+            _client.DefaultRequestHeaders.Add("Authorization", "bearer " + user2.Token);
+            var responseWallet2 = await TestsHelper.SendRequest(_client, null, "api/wallets/" + crypto, HttpMethod.Get);
+            Wallet fundUser2 = JsonConvert.DeserializeObject<Wallet>(await responseWallet2.Content.ReadAsStringAsync());
 
-            
-        }
-
-        [Test]
-        public void save_transaction_in_database()
-        {
-
+            Assert.That(fundUser1.Fund == 100 - amount);
+            Assert.That(fundUser2.Fund == amount);
         }
     }
 }

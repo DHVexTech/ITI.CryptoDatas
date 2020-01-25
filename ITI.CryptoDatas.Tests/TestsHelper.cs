@@ -44,9 +44,11 @@ namespace ITI.CryptoDatas.Tests
             JsonHelper.WriteInDatabase<Transaction>(new List<Transaction>(), "transactions");
         }
 
-        public static async Task<HttpResponseMessage> SendRequest(HttpClient client, object body, string query)
+        public static async Task<HttpResponseMessage> SendRequest(HttpClient client, object body, string query, HttpMethod method = null)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, query);
+            if (method == null)
+                method = HttpMethod.Post;
+            HttpRequestMessage request = new HttpRequestMessage(method, query);
             request.Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
             return await client.SendAsync(request);
         }

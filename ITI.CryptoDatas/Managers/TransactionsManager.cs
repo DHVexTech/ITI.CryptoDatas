@@ -32,7 +32,8 @@ namespace ITI.CryptoDatas.Managers
             _walletsManager.ManageFund(walletTransaction, receiver, "+");
 
             List<Transaction> transactions = JsonHelper.GetFromDatabase<Transaction>(_databaseName);
-            transaction.Id = transactions.Last().Id + 1;
+            if (transactions.Count != 0)
+                transaction.Id = transactions.Last().Id + 1;
             transactions.Add(transaction);
             JsonHelper.WriteInDatabase<Transaction>(transactions, _databaseName);
             return null;
