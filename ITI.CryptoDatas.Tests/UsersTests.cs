@@ -108,7 +108,7 @@ namespace ITI.CryptoDatas.Tests
             string claimsUsernameRegister = TestsHelper.GetUniqueNameToken(resultRegister.Token);
 
             Assert.That(claimsUsernameLogin, Is.EqualTo(claimsUsernameRegister));
-            Assert.That(resultRegister.Token, Is.Not.EqualTo(resultLogin.Token));
+            Assert.That(resultRegister.Token, Is.EqualTo(resultLogin.Token));
         }
 
         [TestCase("username", "firstname", "lastname", "password")]
