@@ -94,12 +94,5 @@ namespace ITI.CryptoDatas.Managers
             }
             return false;
         }
-
-        //private Wallet GetUserWallet(string username, string crypto)
-        //{
-        //    List<Wallet> wallets = JsonHelper.GetFromDatabase<Wallet>(_databaseName);
-        //    User currentUser = _userManager.GetUser(username);
-        //    return wallets.Single(x => x.CryptoName == crypto && currentUser.Wallets.Contains(x.Id));
-        //}
     }
 }
