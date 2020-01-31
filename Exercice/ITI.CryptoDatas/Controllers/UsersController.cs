@@ -29,16 +29,11 @@ namespace ITI.CryptoDatas.Controllers
             _userManager = usersManager;
         }
 
-        [HttpPost("login")]
+       [HttpPost("login")]
         [AllowAnonymous]
         public ActionResult<User> Login([FromBody]User userData)
         {
-            if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return Forbid();
-            User user = _userManager.Login(userData);
-            if (user == null)
-                return Forbid();
-            else
-                return Json(user);
+            throw new NotImplementedException();
         }
 
         [HttpPost("register")]

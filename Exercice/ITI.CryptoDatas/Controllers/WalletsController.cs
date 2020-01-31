@@ -42,9 +42,7 @@ namespace ITI.CryptoDatas.Controllers
         [Authorize]
         public ActionResult<Wallet> RemoveFund([FromBody]Wallet wallet)
         {
-            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
-            User user = _usersManager.GetUser(currentUsername.Name);
-            return Json(_walletManager.ManageFund(wallet, user, "-"));
+            throw new NotImplementedException();
         }
 
         [HttpGet]

@@ -45,6 +45,7 @@ namespace ITI.CryptoDatas
             });
 
             services.AddTransient<UsersManager>();
+            services.AddTransient<CryptosManager>();
             services.AddTransient<TransactionsManager>();
             services.AddTransient<WalletsManager>();
         }

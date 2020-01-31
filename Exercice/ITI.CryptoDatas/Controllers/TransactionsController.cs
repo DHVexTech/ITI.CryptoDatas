@@ -18,7 +18,7 @@ namespace ITI.CryptoDatas.Controllers
             _transactionManager = transactionsManager;
         }
 
-        [HttpPost("give")]
+        
         [Authorize]
         public ActionResult<Transaction> Give([FromBody]Transaction transaction)
         {
