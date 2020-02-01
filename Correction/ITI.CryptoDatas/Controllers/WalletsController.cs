@@ -19,40 +19,50 @@ namespace ITI.CryptoDatas.Controllers
 
         public WalletsController(WalletsManager walletsManager, UsersManager usersManager)
         {
+            _usersManager = usersManager;
+            _walletManager = walletsManager;
         }
 
         [HttpPost]
         public ActionResult<bool> Add([FromBody]Wallet wallet)
         {
-            throw new NotImplementedException();
+            return _walletManager.Add(wallet);
         }
 
         [HttpPut("refund")]
         [Authorize]
         public ActionResult<Wallet> Refund([FromBody]Wallet wallet)
         {
-            throw new NotImplementedException();
+            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
+            User user = _usersManager.GetUser(currentUsername.Name);
+            return Json(_walletManager.ManageFund(wallet, user, "+"));
         }
 
         [HttpPut("removefund")]
         [Authorize]
         public ActionResult<Wallet> RemoveFund([FromBody]Wallet wallet)
         {
-            throw new NotImplementedException();
+            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
+            User user = _usersManager.GetUser(currentUsername.Name);
+            return Json(_walletManager.ManageFund(wallet, user, "-"));
         }
 
         [HttpGet]
         [Authorize]
         public ActionResult<List<Wallet>> GetUserWallets()
         {
-            throw new NotImplementedException();
+            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
+            User user = _usersManager.GetUser(currentUsername.Name);
+            return Json(_walletManager.GetUserWallets(user));
         }
 
         [HttpGet("{crypto}")]
         [Authorize]
         public ActionResult<List<Wallet>> GetSpecificWallet(string crypto)
         {
-            throw new NotImplementedException();
+            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
+            User user = _usersManager.GetUser(currentUsername.Name);
+            return Json(_walletManager.GetSpecificWallet(user, crypto));
         }
     }
 }

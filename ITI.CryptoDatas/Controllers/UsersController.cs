@@ -26,55 +26,40 @@ namespace ITI.CryptoDatas.Controllers
 
         public UsersController(UsersManager usersManager)
         {
-            _userManager = usersManager;
         }
 
         [HttpPost("login")]
         [AllowAnonymous]
         public ActionResult<User> Login([FromBody]User userData)
         {
-            if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return Forbid();
-            User user = _userManager.Login(userData);
-            if (user == null)
-                return Forbid();
-            else
-                return Json(user);
+            throw new NotImplementedException();
         }
 
         [HttpPost("register")]
         public ActionResult Register([FromBody]User userData)
         {
-            if (string.IsNullOrEmpty(userData.Username) || string.IsNullOrEmpty(userData.Password)) return Forbid();
-            User result = _userManager.Register(userData);
-            if (result != null)
-                return Json(result);
-            else
-                return UnprocessableEntity();
+            throw new NotImplementedException();
         }
 
         [HttpDelete]
         [Authorize]
         public ActionResult<bool> Delete()
         {
-            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
-            return _userManager.Delete(currentUsername.Name);
+            throw new NotImplementedException();
         }
 
         [HttpPut]
         [Authorize]
         public ActionResult<bool> Edit(User userInput)
         {
-            ClaimsIdentity currentUsername = HttpContext.User.Identities.First(x => x.Name != null);
-            if (userInput.Username != currentUsername.Name) return false;
-            return _userManager.Edit(userInput);
+            throw new NotImplementedException();
         }
 
         [HttpGet]
         [Authorize]
         public ActionResult<User> GetUser(string username)
         {
-            if (string.IsNullOrEmpty(username)) return Forbid();
-            return _userManager.GetUser(username);
+            throw new NotImplementedException();
         }
     }
 }
